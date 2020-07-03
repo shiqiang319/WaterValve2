@@ -1,8 +1,11 @@
 package com.example.watervalve;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -22,7 +26,17 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.example.watervalve.Login.ScanMessage;
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.litepal.LitePal;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.watervalve.Utility.BtnShow;
 import static com.example.watervalve.Utility.SetCommandJson;
@@ -54,12 +68,23 @@ public class FristFragment extends Fragment {
     private EditText kaiguanxianshi;
     private static final int UPDATE_TEXT=1;
     private  Boolean fag;
+    private static Context mContext =null;
+
+    private List<CharSequence> eduList = null;
+    private ArrayAdapter<CharSequence> eduAdapter = null;
+    private int num;
+    private String topic;
+
+    public static void main(String[] args) {
+
+    }
 
     @SuppressLint("ResourceAsColor")
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_frist, null);
+        mContext=getActivity();
         swipeRefresh=view.findViewById(R.id.swipe_refresh);
         spinner=view.findViewById(R.id.Spi);
         fahoukaidu=view.findViewById(R.id.fakoukaidu);
@@ -70,12 +95,32 @@ public class FristFragment extends Fragment {
         fakouxiaxian=view.findViewById(R.id.fakouxiaxian);
         fakoushangxian=view.findViewById(R.id.fakoushangxian);
         kaiguanxianshi=view.findViewById(R.id.kaiguanxianshi);
+
+        ScanMessage lastmessage= LitePal.findLast(ScanMessage.class);
+        topic=lastmessage.getTopic().trim();
+        //设置spinner
+        eduList = new ArrayList<CharSequence>();
+        num=Integer.valueOf(lastmessage.getNum().trim());
+        for (int i=0;i<=num;i++){
+            eduList.add(String.valueOf(i));
+        }
+        eduAdapter = new ArrayAdapter<CharSequence>(this.getActivity(),android.R.layout.simple_spinner_item,eduList);
+        eduAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(eduAdapter);
+
         //下拉刷新
         swipeRefresh.setColorSchemeColors(R.color.colorPrimary);
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-               Utility.requestData();
+              // Utility.requestData();
+                MyMqttClient.sharedCenter().setSendData(
+                        //"/sys/a1S917F388O/wenxin/thing/event/property/post",
+                        //"/a1yPGkxyv1q/SimuApp/user/update",
+                        topic,
+                        "{\"method\":\"thing.event.property.post\",\"id\":\"1111\",\"params\":{\"Id\":1,\"Cmd\":112,\"Para\":[1]},\"version\":\"1.0.0\"}",
+                        0,
+                        false);
                Log.e("下拉刷新","已发送查询指令");
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -143,13 +188,14 @@ public class FristFragment extends Fragment {
                 if (cardNumber.equals("0")) {
                     return;
                 }
-                Toast.makeText(getActivity(), "你正在操作阀门：" + cardNumber, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(), "你正在操作阀门：" + cardNumber, Toast.LENGTH_SHORT).show();
                 String inputx= spinner.getSelectedItem().toString();
                 Log.e("设置阀门：",inputx);
                 Integer x=Integer.parseInt(inputx);
                 MyMqttClient.sharedCenter().setSendData(
                         //"/sys/a1S917F388O/wenxin/thing/event/property/post",
-                        "/a1yPGkxyv1q/SimuApp/user/update",
+                        //"/a1yPGkxyv1q/SimuApp/user/update",
+                        topic,
                         Utility.CommandJson(x,112,1),
                         0,
                         false);
@@ -189,7 +235,8 @@ public class FristFragment extends Fragment {
                 Integer x=Integer.parseInt(inputx);
                 MyMqttClient.sharedCenter().setSendData(
                         //"/sys/a1S917F388O/wenxin/thing/event/property/post",
-                        "/a1yPGkxyv1q/SimuApp/user/update",
+                        //"/a1yPGkxyv1q/SimuApp/user/update",
+                        topic,
                         Utility.CommandJson(x,67,para),
                         0,
                         false);
@@ -210,12 +257,6 @@ public class FristFragment extends Fragment {
                         }
                     }
                 },500);
-//                if (jia.getText().equals("开度+")||jian.getText().equals("开度-")){
-//                    handler.postDelayed(runnable,1000);
-//
-//                }else if (jia.getText().equals("停止+")||jian.getText().equals("停止-")){
-//                    handler.removeCallbacks(runnable);
-//                }
             }
         });
     }
@@ -244,7 +285,8 @@ public class FristFragment extends Fragment {
                 jsonArray.put(P4);
                 MyMqttClient.sharedCenter().setSendData(
                         //"/sys/a1S917F388O/wenxin/thing/event/property/post",
-                        "/a1yPGkxyv1q/SimuApp/user/update",
+                        //"/a1yPGkxyv1q/SimuApp/user/update",
+                        topic,
                         SetCommandJson(x,97,jsonArray),
                         0,
                         false);
@@ -269,6 +311,18 @@ public class FristFragment extends Fragment {
             }
         });
     }
+
+    public static Handler handler0=new Handler(){
+        public  void handleMessage(Message msg){
+            switch(msg.what){
+                case UPDATE_TEXT:
+                    Toast.makeText(mContext,"已连接到服务器！",Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
     private Handler handler1=new Handler(){
         public  void handleMessage(Message msg){
             switch(msg.what){
@@ -284,7 +338,14 @@ public class FristFragment extends Fragment {
         Runnable runnable=new Runnable() {
             @Override
             public void run() {
-                Utility.requestData();
+              //  Utility.requestData();
+                MyMqttClient.sharedCenter().setSendData(
+                        //"/sys/a1S917F388O/wenxin/thing/event/property/post",
+                        //"/a1yPGkxyv1q/SimuApp/user/update",
+                        topic,
+                        "{\"method\":\"thing.event.property.post\",\"id\":\"1111\",\"params\":{\"Id\":1,\"Cmd\":112,\"Para\":[1]},\"version\":\"1.0.0\"}",
+                        0,
+                        false);
                 Log.e("刷新","已发送查询指令");
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -307,4 +368,5 @@ public class FristFragment extends Fragment {
                 handler.postDelayed(this,1000);
             }
         };
+
 }

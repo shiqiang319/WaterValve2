@@ -1,5 +1,6 @@
 package com.example.watervalve;
 
+import android.os.Message;
 import android.util.Log;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -17,12 +18,51 @@ import java.util.concurrent.Executors;
 public class MyMqttClient {
     private static final String TAG  = MyMqttClient.class.getSimpleName();
     private static MyMqttClient myMqttClient;
+    private static final int UPDATE_TEXT=1;
 
-    private static String ClientId = "SimuApp|securemode=3,signmethod=hmacsha1|";
-    private static String MqttUserString = "SimuApp&a1yPGkxyv1q";
-    private static String MqttPwdString = "5b25347c95b117f99d735816be534683baea20de";
-    private static String MqttIPString = "a1yPGkxyv1q.iot-as-mqtt.cn-shanghai.aliyuncs.com";
-    private static int MqttPort = 1883;
+    private  String ClientId ;
+    private  String MqttUserString ;
+    private  String MqttPwdString ;
+    private  String MqttIPString ;
+    private  int MqttPort = 1883;
+
+    public String getClientId() {
+        return ClientId;
+    }
+
+    public void setClientId(String clientId) {
+        ClientId = clientId;
+    }
+
+    public String getMqttUserString() {
+        return MqttUserString;
+    }
+
+    public void setMqttUserString(String mqttUserString) {
+        MqttUserString = mqttUserString;
+    }
+
+    public String getMqttPwdString() {
+        return MqttPwdString;
+    }
+
+    public void setMqttPwdString(String mqttPwdString) {
+        MqttPwdString = mqttPwdString;
+    }
+
+    public String getMqttIPString() {
+        return MqttIPString;
+    }
+
+    public void setMqttIPString(String mqttIPString) {
+        MqttIPString = mqttIPString;
+    }
+
+//    private static String ClientId = "SimuApp|securemode=3,signmethod=hmacsha1|";
+//    private static String MqttUserString = "SimuApp&a1yPGkxyv1q";
+//    private static String MqttPwdString = "5b25347c95b117f99d735816be534683baea20de";
+//    private static String MqttIPString = "a1yPGkxyv1q.iot-as-mqtt.cn-shanghai.aliyuncs.com";
+//    private static int MqttPort = 1883;
 
 //    private static String ClientId = "wenxin|securemode=3,signmethod=hmacsha1|";
 //    private static String MqttUserString = "wenxin&a1S917F388O";
@@ -132,7 +172,15 @@ public class MyMqttClient {
                                     ConnectedCallback.callback();
                                 ConnectFlage = false;
                                 Log.e(TAG, "run: Connect Success");
-                                //Toast.makeText(,"服务器连接成功！",Toast.LENGTH_SHORT).show();
+                                //Toast
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Message message=new Message();
+                                        message.what=1;
+                                        FristFragment.handler0.sendMessage(message);
+                                    }
+                                }).start();
                             }
                         }
                     } catch (Exception e) {

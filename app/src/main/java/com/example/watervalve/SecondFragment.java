@@ -15,7 +15,10 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.watervalve.Login.ScanMessage;
+
 import org.json.JSONArray;
+import org.litepal.LitePal;
 
 import static com.example.watervalve.Utility.SetCommandJson;
 
@@ -24,6 +27,7 @@ public class SecondFragment extends Fragment {
     private EditText wenduxiaxian;
     private EditText wendushangxian;
     private Button   shezhi;
+    private String   topic;
 
     @Nullable
     @Override
@@ -34,6 +38,9 @@ public class SecondFragment extends Fragment {
         wendushangxian=view.findViewById(R.id.wendushangxian);
         shezhi=view.findViewById(R.id.shezhi);
         ShezhiBtnListener(shezhi);
+
+        ScanMessage lastmessage= LitePal.findLast(ScanMessage.class);
+        topic=lastmessage.getTopic().trim();
         return view;
     }
     //按钮点击事件
@@ -52,7 +59,8 @@ public class SecondFragment extends Fragment {
                 jsonArray.put(P2);
                 MyMqttClient.sharedCenter().setSendData(
                         //"/sys/a1S917F388O/wenxin/thing/event/property/post",
-                        "/a1yPGkxyv1q/SimuApp/user/update",
+                        //"/a1yPGkxyv1q/SimuApp/user/update",
+                        topic,
                         SetCommandJson(1,111,jsonArray),
                         0,
                         false);

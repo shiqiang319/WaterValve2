@@ -4,14 +4,17 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.widget.Button;
 
+import com.example.watervalve.Login.ScanMessage;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.litepal.LitePal;
 
 
 public class Utility {
+
     public static Data handleDataResponse(String response){
         try{
             JSONObject jsonObject=new JSONObject(response);
@@ -21,14 +24,14 @@ public class Utility {
         }
         return null;
     }
-    public static  void requestData(){
-        MyMqttClient.sharedCenter().setSendData(
-                //"/sys/a1S917F388O/wenxin/thing/event/property/post",
-                "/a1yPGkxyv1q/SimuApp/user/update",
-                "{\"method\":\"thing.event.property.post\",\"id\":\"1111\",\"params\":{\"Id\":1,\"Cmd\":112,\"Para\":[1]},\"version\":\"1.0.0\"}",
-                0,
-                false);
-    }
+//    public static  void requestData(){
+//        MyMqttClient.sharedCenter().setSendData(
+//                //"/sys/a1S917F388O/wenxin/thing/event/property/post",
+//                "/a1yPGkxyv1q/SimuApp/user/update",
+//                "{\"method\":\"thing.event.property.post\",\"id\":\"1111\",\"params\":{\"Id\":1,\"Cmd\":112,\"Para\":[1]},\"version\":\"1.0.0\"}",
+//                0,
+//                false);
+//    }
     public static  void szrequestData(){
         MyMqttClient.sharedCenter().setSendData(
                 //"/sys/a1S917F388O/wenxin/thing/event/property/post",
