@@ -298,6 +298,8 @@ public class Login extends Activity implements View.OnClickListener{            
         if (isUserNameAndPwdValid()) {
             //删除数据库所有信息
             LitePal.deleteAll(ScanMessage.class);
+            login_sp.edit().clear().commit();
+
             String userName = mAccount.getText().toString().trim();    //获取当前输入的用户名和密码信息
             String userPwd = mPwd.getText().toString().trim();
             int result=mUserDataManager.findUserByNameAndPwd(userName, userPwd);
